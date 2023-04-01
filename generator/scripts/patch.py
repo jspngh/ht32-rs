@@ -11,15 +11,15 @@ Usage: python3 scripts/patch.py devices/
 import argparse
 import subprocess
 from pathlib import Path
-from loguru import logger
+import logging
 
 
 def patch_files(device_path: Path):
     device_files = [f for f in device_path.iterdir() if f.is_file()]
     for path in device_files:
-        logger.debug("patching {}...", path)
+        logging.debug("patching {}...".format(path))
         svdtools_result = subprocess.call(["svdtools", "patch", f"{path.absolute()}"])
-        logger.debug("subprocess call svdtools := {}", svdtools_result)
+        logging.debug("subprocess call svdtools := {}".format(svdtools_result))
 
 
 if __name__ == "__main__":

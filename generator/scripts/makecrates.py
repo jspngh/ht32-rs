@@ -14,10 +14,8 @@ Usage: python3 scripts/makecrates.py devices/
 import argparse
 from importlib import resources
 from pathlib import Path
-from sys import version_info
 from typing import Dict, List
-
-from loguru import logger
+import logging
 
 from generator import resource
 from .shared import read_device_table
@@ -110,7 +108,7 @@ def make_crates(devices_path: Path, yes: bool):
         yamlfile = path.stem
         family_string = yamlfile.split("_")[0]
         family = family_string[:6]
-        logger.debug("family_string := {!r}", family_string)
+        logging.debug("family_string := {!r}".format(family_string))
         if len(family_string) == 10:
             family = f"{family}xxxx"
         elif len(family_string) == 9:
@@ -121,13 +119,13 @@ def make_crates(devices_path: Path, yes: bool):
         device = path.stem.lower()
         if family not in devices:
             devices[family] = []
-        logger.debug("new device {!r}", device)
+        logging.debug("new device {!r}".format(device))
         devices[family].append(device)
 
     table = read_device_table()
 
     dirs = [CWD / family for family in devices]
-    logger.info("Going to create/update the following directories: {}", dirs)
+    logging.info("Going to create/update the following directories: {}".format(dirs))
     if not yes:
         input("Enter to continue, ctrl-C to cancel")
 
