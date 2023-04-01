@@ -8,8 +8,7 @@ Usage: python3 scripts/makemodules.py devices/
 """
 import pathlib
 import subprocess
-
-from loguru import logger
+import logging
 
 from .shared import read_device_table
 
@@ -25,25 +24,25 @@ def make_modules():
 
         for module in table[crate]:
             output_patch = SVD_DIR / f"{module}.svd.patched"
-            logger.info("Generating code for {}", output_patch.absolute())
+            logging.info("Generating code for {}".format(output_patch.absolute()))
             module_dir = ROOT / crate / "src" / module
             module_dir.mkdir(parents=True, exist_ok=True)
-            logger.debug("entering {}", module_dir.absolute())
+            logging.debug("entering {}".format(module_dir.absolute()))
             svd_result = subprocess.call(
                 ["svd2rust", "-m", "-g", "--strict", "--pascal_enum_values",
                  "--max_cluster_size", "-i", f"{output_patch.absolute()}"],
                 cwd=module_dir
             )
-            logger.debug("subprocess call svd2rust := {}", svd_result)
+            logging.debug("subprocess call svd2rust := {}".format(svd_result))
             (module_dir / "build.rs").unlink()
             (module_dir / "generic.rs").replace(module_dir / ".." / "generic.rs")
             form_result = subprocess.call(["form", "-i", "mod.rs", "-o", "."], cwd=module_dir)
-            logger.debug("subprocess call form := {}", form_result)
+            logging.debug("subprocess call form := {}".format(form_result))
             (module_dir / "lib.rs").replace(module_dir / "mod.rs")
             rustfmt_args = ["rustfmt", f"--config-path={RUST_FMT.absolute()}"]
             rustfmt_args.extend([str(i) for i in module_dir.glob("*.rs")])
             rustfmt_result = subprocess.call(rustfmt_args, cwd=module_dir)
-            logger.debug("subprocess call rustfmt := {}", rustfmt_result)
+            logging.debug("subprocess call rustfmt := {}".format(rustfmt_result))
             lines = (module_dir / "mod.rs").read_text().splitlines(keepends=True)
 
             # these are lines that annoy rustc

@@ -5,32 +5,27 @@ Copyright 2020 Henrik Böving
 """
 import pathlib
 import subprocess
-import sys
-
-from loguru import logger
+import logging
 
 from generator.scripts import makemodules, patch, makecrates
 
 # logger setup
-logger.remove()
-logger.add(sys.stdout, colorize=True,
-           format="<k>[</>{time} <level>{level}</> <green>{module}.{function}:{line}</><k>]</> "
-                  "<level>{message}</>", level="INFO")
+logging.basicConfig(format='[%(funcName)s:%(levelname)s] %(message)s', level=logging.INFO)
 
 # grab absolute path to the CWD, just in case something fiddles with the CWD...
 CWD = pathlib.Path().absolute()
 SVD = CWD / "svd"
 DEVICES = CWD / "devices"
 
-logger.info("Cleaning")
+logging.info("Cleaning")
 for patched in SVD.glob("*.patched"):
-    logger.debug("deleting {}", patched.absolute())
+    logging.debug("deleting {}".format(patched.absolute()))
     patched.unlink()
 # idk how to do this in pathlib without making a giant mess...
 subprocess.check_call(["rm", "-rf", "ht32f*"])
-logger.info("Creating crates")
+logging.info("Creating crates")
 makecrates.make_crates(DEVICES, True)
-logger.info("Patching SVD files")
+logging.info("Patching SVD files")
 patch.patch_files(DEVICES)
-logger.info("Generating code")
+logging.info("Generating code")
 makemodules.make_modules()
