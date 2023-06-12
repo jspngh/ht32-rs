@@ -1,8 +1,10 @@
 name: CI for PRs
 on:
-  push:
+  pull_request:
+    types:
+      - opened
     branches:
-      - '!master'
+      - 'master'
 
 jobs:
   build:
